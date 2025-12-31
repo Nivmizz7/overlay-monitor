@@ -1,14 +1,15 @@
 # overlay-monitor
 
-Simple web monitor that renders the README from `tarkov-data-overlay-niv` and refreshes automatically when it changes.
+Web monitor that watches `overlay.json` and renders a live table of changes
+(added/removed/changed values with old/new values).
 
 ## Run
 
 ```bash
-node server.js
+npm start
 ```
 
 Optional environment variables:
 
 - `PORT` (default: `3000`)
-- `TARGET_README` (default: `../tarkov-data-overlay-niv/README.md`)
+- `TARGET_FILE` (default: `../tarkov-data-overlay-niv/dist/overlay.json`)

@@ -1,149 +1,135 @@
 const statusEl = document.getElementById("status");
 const updatedEl = document.getElementById("updated");
-const contentEl = document.getElementById("content");
+const pathEl = document.getElementById("path");
+const emptyEl = document.getElementById("empty");
+const tableEl = document.getElementById("table");
+const tbodyEl = document.getElementById("tbody");
+let pollTimer = null;
 
-let lastMtime = 0;
-
-function escapeHtml(text) {
-  return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+function formatValue(value) {
+  if (value === null || value === undefined) {
+    return "--";
+  }
+  if (typeof value === "string") {
+    return value;
+  }
+  try {
+    return JSON.stringify(value, null, 2);
+  } catch (error) {
+    return String(value);
+  }
 }
 
-function renderInline(text) {
-  let html = escapeHtml(text);
-  html = html.replace(/`([^`]+)`/g, "<code>$1</code>");
-  html = html.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
-  html = html.replace(/\*([^*]+)\*/g, "<em>$1</em>");
-  html = html.replace(
-    /\[([^\]]+)\]\(([^)]+)\)/g,
-    '<a href="$2" target="_blank" rel="noopener">$1</a>',
-  );
-  return html;
-}
-
-function splitTableRow(row) {
-  const trimmed = row.trim().replace(/^\|/, "").replace(/\|$/, "");
-  return trimmed.split("|").map((cell) => cell.trim());
-}
-
-function isTableSeparator(line) {
-  return line.includes("|") && /^[\s|:-]+$/.test(line);
-}
-
-function renderBlock(text) {
-  const lines = text.split(/\r?\n/);
-  let i = 0;
-  let html = "";
-
-  while (i < lines.length) {
-    const line = lines[i];
-
-    if (!line.trim()) {
-      i += 1;
-      continue;
-    }
-
-    const headingMatch = /^(#{1,6})\s+(.*)$/.exec(line);
-    if (headingMatch) {
-      const level = headingMatch[1].length;
-      html += `<h${level}>${renderInline(
-        headingMatch[2].trim(),
-      )}</h${level}>`;
-      i += 1;
-      continue;
-    }
-
-    if (line.includes("|") && i + 1 < lines.length && isTableSeparator(lines[i + 1])) {
-      const headers = splitTableRow(line);
-      i += 2;
-      const rows = [];
-
-      while (i < lines.length && lines[i].includes("|")) {
-        rows.push(splitTableRow(lines[i]));
-        i += 1;
-      }
-
-      html += "<table><thead><tr>";
-      headers.forEach((header) => {
-        html += `<th>${renderInline(header)}</th>`;
-      });
-      html += "</tr></thead><tbody>";
-      rows.forEach((row) => {
-        html += "<tr>";
-        row.forEach((cell) => {
-          html += `<td>${renderInline(cell)}</td>`;
-        });
-        html += "</tr>";
-      });
-      html += "</tbody></table>";
-      continue;
-    }
-
-    if (/^[-*]\s+/.test(line)) {
-      html += "<ul>";
-      while (i < lines.length && /^[-*]\s+/.test(lines[i])) {
-        html += `<li>${renderInline(lines[i].replace(/^[-*]\s+/, ""))}</li>`;
-        i += 1;
-      }
-      html += "</ul>";
-      continue;
-    }
-
-    const paragraphLines = [];
-    while (
-      i < lines.length &&
-      lines[i].trim() &&
-      !/^(#{1,6})\s+/.test(lines[i]) &&
-      !/^[-*]\s+/.test(lines[i]) &&
-      !(lines[i].includes("|") && i + 1 < lines.length && isTableSeparator(lines[i + 1]))
-    ) {
-      paragraphLines.push(lines[i]);
-      i += 1;
-    }
-
-    if (paragraphLines.length) {
-      html += `<p>${renderInline(paragraphLines.join(" "))}</p>`;
-    }
+function renderTable(changes) {
+  tbodyEl.innerHTML = "";
+  if (!changes || changes.length === 0) {
+    emptyEl.style.display = "block";
+    tableEl.style.display = "none";
+    return;
   }
 
-  return html;
+  emptyEl.style.display = "none";
+  tableEl.style.display = "table";
+
+  changes.forEach((change) => {
+    const row = document.createElement("tr");
+
+    const typeCell = document.createElement("td");
+    const badge = document.createElement("span");
+    badge.className = `badge ${change.type}`;
+    badge.textContent = change.type;
+    typeCell.appendChild(badge);
+
+    const pathCell = document.createElement("td");
+    pathCell.textContent = change.path || "(root)";
+
+    const oldCell = document.createElement("td");
+    const oldPre = document.createElement("pre");
+    oldPre.className = "value";
+    oldPre.textContent = formatValue(change.oldValue);
+    oldCell.appendChild(oldPre);
+
+    const newCell = document.createElement("td");
+    const newPre = document.createElement("pre");
+    newPre.className = "value";
+    newPre.textContent = formatValue(change.newValue);
+    newCell.appendChild(newPre);
+
+    row.appendChild(typeCell);
+    row.appendChild(pathCell);
+    row.appendChild(oldCell);
+    row.appendChild(newCell);
+    tbodyEl.appendChild(row);
+  });
 }
 
-function renderMarkdown(markdown) {
-  const chunks = markdown.split(/```/);
-  return chunks
-    .map((chunk, index) => {
-      if (index % 2 === 1) {
-        const code = escapeHtml(chunk.replace(/^\n/, "").replace(/\n$/, ""));
-        return `<pre><code>${code}</code></pre>`;
-      }
-      return renderBlock(chunk);
-    })
-    .join("");
+function updateStatus(state) {
+  if (!state) {
+    return;
+  }
+  if (state.error) {
+    statusEl.textContent = "Erreur de lecture";
+  } else {
+    statusEl.textContent = "Synchronise";
+  }
+
+  if (state.updatedAt) {
+    const updatedDate = new Date(state.updatedAt);
+    updatedEl.textContent = `Derniere mise a jour : ${updatedDate.toLocaleString()}`;
+  }
+
+  if (state.filePath) {
+    pathEl.textContent = state.filePath;
+  }
+
+  renderTable(state.changes);
 }
 
-async function loadReadme() {
+async function fetchLatest() {
   try {
-    const response = await fetch("/readme", { cache: "no-store" });
+    const response = await fetch("/latest", { cache: "no-store" });
     if (!response.ok) {
-      throw new Error("readme_fetch_failed");
+      throw new Error("latest_fetch_failed");
     }
     const data = await response.json();
-    if (data.mtimeMs !== lastMtime) {
-      contentEl.innerHTML = renderMarkdown(data.content || "");
-      lastMtime = data.mtimeMs;
-    }
-    statusEl.textContent = "Synchronise";
-    const updatedDate = new Date(data.mtimeMs);
-    updatedEl.textContent = `Derniere mise a jour : ${updatedDate.toLocaleString()}`;
+    updateStatus(data);
   } catch (error) {
     statusEl.textContent = "Erreur de chargement";
   }
 }
 
-loadReadme();
-setInterval(loadReadme, 2000);
+function startPolling() {
+  if (pollTimer) {
+    return;
+  }
+  pollTimer = window.setInterval(fetchLatest, 2000);
+}
+
+function connectEvents() {
+  if (!window.EventSource) {
+    return false;
+  }
+
+  const source = new EventSource("/events");
+  source.addEventListener("state", (event) => {
+    updateStatus(JSON.parse(event.data));
+  });
+  source.addEventListener("changes", (event) => {
+    updateStatus(JSON.parse(event.data));
+  });
+  source.addEventListener("error", (event) => {
+    updateStatus(JSON.parse(event.data));
+  });
+  source.onerror = () => {
+    statusEl.textContent = "Connexion interrompue";
+    source.close();
+    startPolling();
+    fetchLatest();
+  };
+  return true;
+}
+
+fetchLatest();
+if (!connectEvents()) {
+  startPolling();
+}

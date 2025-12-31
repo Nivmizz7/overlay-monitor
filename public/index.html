@@ -2,10 +2,7 @@
 <html lang="fr">
   <head>
     <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Overlay Monitor</title>
     <link rel="stylesheet" href="/styles.css" />
   </head>
@@ -14,19 +11,33 @@
       <header class="hero">
         <div>
           <p class="eyebrow">Overlay Monitor</p>
-          <h1>README en temps reel</h1>
+          <h1>Changements en direct</h1>
           <p class="lede">
-            Cette page suit les modifications du README de
-            <span class="code">tarkov-data-overlay-niv</span>.
+            Vue dynamique des changements detects sur
+            <span class="code">overlay.json</span>.
           </p>
         </div>
         <div class="meta">
           <div class="status" id="status">Chargement...</div>
           <div class="updated" id="updated">Derniere mise a jour : --</div>
+          <div class="path" id="path"></div>
         </div>
       </header>
       <main>
-        <section class="content" id="content"></section>
+        <section class="content">
+          <div class="empty" id="empty">Aucun changement detecte.</div>
+          <table class="table" id="table">
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Chemin</th>
+                <th>Ancienne valeur</th>
+                <th>Nouvelle valeur</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </section>
       </main>
     </div>
     <script src="/app.js"></script>
