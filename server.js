@@ -47,7 +47,7 @@ const SOURCES = {
       process.env.TARGET_TRADERS ||
       path.resolve(
         __dirname,
-        "../tarkov-data-overlay-niv/src/overrides/traders.json5",
+        "https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/src/overrides/traders.json5",
       ),
     parser: parseGeneric,
   },
