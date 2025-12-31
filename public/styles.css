@@ -1,14 +1,15 @@
 :root {
   color-scheme: light;
-  --bg: #0b0f12;
-  --bg-accent: #121820;
-  --ink: #edf2f7;
-  --muted: #9aa5b1;
-  --accent: #46b29d;
-  --accent-2: #f2a365;
-  --card: #151b23;
-  --border: #273140;
-  --shadow: 0 22px 50px rgba(0, 0, 0, 0.35);
+  --bg: #0b0d0b;
+  --bg-accent: #121612;
+  --ink: #e7e3d6;
+  --muted: #9a968a;
+  --accent: #9ca86b;
+  --accent-2: #c8a96b;
+  --card: #151a14;
+  --border: #2a2f25;
+  --shadow: 0 22px 50px rgba(0, 0, 0, 0.45);
+  --grid: rgba(255, 255, 255, 0.03);
 }
 
 * {
@@ -17,12 +18,14 @@
 
 body {
   margin: 0;
-  font-family: "Space Grotesk", "IBM Plex Sans", "Noto Sans", sans-serif;
+  font-family: "Rajdhani", "Space Grotesk", "IBM Plex Sans", sans-serif;
   color: var(--ink);
   background:
-    radial-gradient(circle at top left, rgba(70, 178, 157, 0.2) 0%, transparent 45%),
-    radial-gradient(circle at 80% 20%, rgba(242, 163, 101, 0.18) 0%, transparent 40%),
+    linear-gradient(120deg, rgba(20, 24, 18, 0.85), rgba(12, 14, 11, 0.9)),
+    radial-gradient(circle at 20% 20%, rgba(156, 168, 107, 0.1) 0%, transparent 40%),
+    radial-gradient(circle at 80% 0%, rgba(200, 169, 107, 0.08) 0%, transparent 45%),
     var(--bg);
+  background-blend-mode: screen, normal, normal, normal;
   min-height: 100vh;
 }
 
@@ -31,6 +34,7 @@ body {
   margin: 0 auto;
   padding: 40px 20px 80px;
   animation: fadeUp 0.6s ease both;
+  position: relative;
 }
 
 .hero {
@@ -55,8 +59,11 @@ body {
   padding: 8px 14px;
   border-radius: 999px;
   border: 1px solid transparent;
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.03);
   transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
 }
 
 .nav a:hover {
@@ -67,7 +74,7 @@ body {
 .nav a.active {
   color: var(--ink);
   border-color: var(--accent);
-  box-shadow: 0 0 0 1px rgba(70, 178, 157, 0.3);
+  box-shadow: 0 0 0 1px rgba(156, 168, 107, 0.3);
 }
 
 .eyebrow {
@@ -80,7 +87,7 @@ body {
 }
 
 h1 {
-  font-family: "Space Grotesk", "IBM Plex Sans", sans-serif;
+  font-family: "Rajdhani", "Space Grotesk", "IBM Plex Sans", sans-serif;
   font-size: clamp(2rem, 4vw, 3rem);
   margin: 0 0 12px;
 }
@@ -124,6 +131,8 @@ h1 {
   padding: 32px;
   border: 1px solid var(--border);
   box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
 }
 
 .table {
@@ -142,7 +151,7 @@ h1 {
 }
 
 .table th {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.04);
   font-weight: 600;
 }
 
@@ -159,23 +168,23 @@ h1 {
 }
 
 .badge.added {
-  background: rgba(70, 178, 157, 0.2);
-  color: #7de2c8;
+  background: rgba(156, 168, 107, 0.2);
+  color: #c6d08a;
 }
 
 .badge.removed {
-  background: rgba(239, 119, 96, 0.2);
-  color: #f58f7c;
+  background: rgba(194, 104, 88, 0.2);
+  color: #e09a8b;
 }
 
 .badge.changed {
-  background: rgba(242, 163, 101, 0.2);
-  color: #f5c28c;
+  background: rgba(200, 169, 107, 0.2);
+  color: #e2c58a;
 }
 
 .value {
-  font-family: "IBM Plex Mono", "Fira Code", monospace;
-  background: rgba(255, 255, 255, 0.06);
+  font-family: "JetBrains Mono", "IBM Plex Mono", "Fira Code", monospace;
+  background: rgba(255, 255, 255, 0.05);
   padding: 8px 10px;
   border-radius: 10px;
   white-space: pre-wrap;
@@ -184,7 +193,7 @@ h1 {
 }
 
 .code {
-  font-family: "IBM Plex Mono", "Fira Code", monospace;
+  font-family: "JetBrains Mono", "IBM Plex Mono", "Fira Code", monospace;
   background: rgba(255, 255, 255, 0.08);
   padding: 2px 6px;
   border-radius: 6px;
@@ -205,7 +214,15 @@ h1 {
 .section {
   padding: 18px;
   border-radius: 16px;
-  background: rgba(0, 0, 0, 0.1);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.2)),
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 6px,
+      rgba(255, 255, 255, 0.02) 6px,
+      rgba(255, 255, 255, 0.02) 8px
+    );
   border: 1px solid var(--border);
 }
 
