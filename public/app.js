@@ -2,6 +2,7 @@ const statusEl = document.getElementById("status");
 const updatedEl = document.getElementById("updated");
 const pathEl = document.getElementById("path");
 const emptyEl = document.getElementById("empty");
+const noteEl = document.getElementById("note");
 const tableEl = document.getElementById("table");
 const tbodyEl = document.getElementById("tbody");
 let pollTimer = null;
@@ -83,6 +84,15 @@ function updateStatus(state) {
   }
 
   renderTable(state.changes);
+
+  if (noteEl) {
+    if (state.truncated) {
+      noteEl.textContent =
+        "Affichage limite aux premieres lignes. Augmente MAX_CHANGES si besoin.";
+    } else {
+      noteEl.textContent = "";
+    }
+  }
 }
 
 async function fetchLatest() {

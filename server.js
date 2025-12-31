@@ -8,11 +8,13 @@ const TARGET_FILE =
   process.env.TARGET_FILE ||
   path.resolve(__dirname, "../tarkov-data-overlay-niv/dist/overlay.json");
 const PUBLIC_DIR = path.resolve(__dirname, "public");
+const MAX_CHANGES = Number(process.env.MAX_CHANGES) || 500;
 
 let lastSnapshot = null;
 let lastChanges = [];
 let lastUpdatedAt = null;
 let lastError = null;
+let lastTruncated = false;
 let isReading = false;
 let pendingRead = false;
 const clients = new Set();
@@ -89,6 +91,10 @@ function deepEqual(a, b) {
 }
 
 function recordChange(changes, type, pathParts, oldValue, newValue) {
+  if (changes.length >= MAX_CHANGES) {
+    lastTruncated = true;
+    return;
+  }
   changes.push({
     type,
     path: pathParts.join(""),
@@ -140,6 +146,7 @@ function getState() {
     filePath: TARGET_FILE,
     updatedAt: lastUpdatedAt,
     changes: lastChanges,
+    truncated: lastTruncated,
     error: lastError,
   };
 }
@@ -166,8 +173,11 @@ async function refreshSnapshot() {
     const parsed = JSON.parse(raw);
 
     if (!lastSnapshot) {
+      const changes = [];
+      lastTruncated = false;
+      diffValues({}, parsed, [], changes);
       lastSnapshot = parsed;
-      lastChanges = [];
+      lastChanges = changes;
       lastUpdatedAt = stats.mtime.toISOString();
       lastError = null;
       broadcast("state", getState());
@@ -175,6 +185,7 @@ async function refreshSnapshot() {
     }
 
     const changes = [];
+    lastTruncated = false;
     diffValues(lastSnapshot, parsed, [], changes);
 
     if (changes.length > 0) {
