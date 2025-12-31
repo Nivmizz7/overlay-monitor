@@ -1,4 +1,5 @@
 const http = require("http");
+const https = require("https");
 const fs = require("fs");
 const path = require("path");
 const { URL } = require("url");
@@ -7,33 +8,47 @@ const PORT = Number(process.env.PORT) || 3476;
 const PUBLIC_DIR = path.resolve(__dirname, "public");
 const MAX_ROWS = Number(process.env.MAX_ROWS) || 200;
 
+const REMOTE_POLL_MS = Number(process.env.REMOTE_POLL_MS) || 30000;
+
 const SOURCES = {
   tasks: {
     title: "Tasks",
     path:
       process.env.TARGET_TASKS ||
-      path.resolve(__dirname, "https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/src/overrides/tasks.json5"),
+      path.resolve(
+        __dirname,
+        "https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/src/overrides/tasks.json5",
+      ),
     parser: parseTasks,
   },
   hideout: {
     title: "Hideout",
     path:
       process.env.TARGET_HIDEOUT ||
-      path.resolve(__dirname, "https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/src/overrides/hideout.json5"),
+      path.resolve(
+        __dirname,
+        "https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/src/overrides/hideout.json5",
+      ),
     parser: parseGeneric,
   },
   items: {
     title: "Items",
     path:
       process.env.TARGET_ITEMS ||
-      path.resolve(__dirname, "https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/src/overrides/items.json5"),
+      path.resolve(
+        __dirname,
+        "https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/src/overrides/items.json5",
+      ),
     parser: parseGeneric,
   },
   traders: {
     title: "Traders",
     path:
       process.env.TARGET_TRADERS ||
-      path.resolve(__dirname, "https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/src/overrides/traders.json5"),
+      path.resolve(
+        __dirname,
+        "../tarkov-data-overlay-niv/src/overrides/traders.json5",
+      ),
     parser: parseGeneric,
   },
 };
@@ -56,6 +71,52 @@ const clientsByType = new Map([
   ["items", new Set()],
   ["traders", new Set()],
 ]);
+
+function isRemotePath(targetPath) {
+  return /^https?:\/\//i.test(targetPath);
+}
+
+function normalizeRemoteUrl(input) {
+  if (!input) {
+    return input;
+  }
+  if (input.includes("github.com") && input.includes("/blob/")) {
+    const url = new URL(input);
+    const parts = url.pathname.split("/").filter(Boolean);
+    const blobIndex = parts.indexOf("blob");
+    if (blobIndex > -1) {
+      const owner = parts[0];
+      const repo = parts[1];
+      const branch = parts[blobIndex + 1];
+      const filePath = parts.slice(blobIndex + 2).join("/");
+      if (owner && repo && branch && filePath) {
+        return `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${filePath}`;
+      }
+    }
+  }
+  return input;
+}
+
+function fetchRemoteText(url) {
+  return new Promise((resolve, reject) => {
+    const request = https.get(url, (res) => {
+      if (res.statusCode && res.statusCode >= 400) {
+        reject(new Error(`HTTP ${res.statusCode}`));
+        res.resume();
+        return;
+      }
+      res.setEncoding("utf8");
+      let data = "";
+      res.on("data", (chunk) => {
+        data += chunk;
+      });
+      res.on("end", () => {
+        resolve(data);
+      });
+    });
+    request.on("error", reject);
+  });
+}
 
 function send(res, status, body, contentType = "text/plain; charset=utf-8") {
   res.writeHead(status, {
@@ -484,13 +545,24 @@ async function refreshSnapshot(type) {
   lock.isReading = true;
   try {
     const target = SOURCES[type];
-    const [raw, stats] = await Promise.all([
-      fs.promises.readFile(target.path, "utf8"),
-      fs.promises.stat(target.path),
-    ]);
+    let raw = "";
+    let updatedAt = null;
+
+    if (isRemotePath(target.path)) {
+      const remoteUrl = normalizeRemoteUrl(target.path);
+      raw = await fetchRemoteText(remoteUrl);
+      updatedAt = new Date().toISOString();
+    } else {
+      const [fileRaw, stats] = await Promise.all([
+        fs.promises.readFile(target.path, "utf8"),
+        fs.promises.stat(target.path),
+      ]);
+      raw = fileRaw;
+      updatedAt = stats.mtime.toISOString();
+    }
     const sections = target.parser(raw, target.title);
     stateByType[type].summary = sections;
-    stateByType[type].updatedAt = stats.mtime.toISOString();
+    stateByType[type].updatedAt = updatedAt;
     stateByType[type].error = null;
     broadcast(type, "summary", getState(type));
   } catch (error) {
@@ -506,11 +578,17 @@ async function refreshSnapshot(type) {
 }
 
 Object.entries(SOURCES).forEach(([type, source]) => {
-  fs.watchFile(source.path, { interval: 1000 }, (curr, prev) => {
-    if (curr.mtimeMs !== prev.mtimeMs) {
+  if (isRemotePath(source.path)) {
+    setInterval(() => {
       refreshSnapshot(type);
-    }
-  });
+    }, REMOTE_POLL_MS);
+  } else {
+    fs.watchFile(source.path, { interval: 1000 }, (curr, prev) => {
+      if (curr.mtimeMs !== prev.mtimeMs) {
+        refreshSnapshot(type);
+      }
+    });
+  }
   refreshSnapshot(type);
 });
 
