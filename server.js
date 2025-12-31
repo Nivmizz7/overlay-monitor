@@ -3,7 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const { URL } = require("url");
 
-const PORT = Number(process.env.PORT) || 3000;
+const PORT = Number(process.env.PORT) || 3476;
 const PUBLIC_DIR = path.resolve(__dirname, "public");
 const MAX_ROWS = Number(process.env.MAX_ROWS) || 200;
 
@@ -12,28 +12,28 @@ const SOURCES = {
     title: "Tasks",
     path:
       process.env.TARGET_TASKS ||
-      path.resolve(__dirname, "../tarkov-data-overlay-niv/src/overrides/tasks.json5"),
+      path.resolve(__dirname, "https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/src/overrides/tasks.json5"),
     parser: parseTasks,
   },
   hideout: {
     title: "Hideout",
     path:
       process.env.TARGET_HIDEOUT ||
-      path.resolve(__dirname, "../tarkov-data-overlay-niv/src/overrides/hideout.json5"),
+      path.resolve(__dirname, "https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/src/overrides/hideout.json5"),
     parser: parseGeneric,
   },
   items: {
     title: "Items",
     path:
       process.env.TARGET_ITEMS ||
-      path.resolve(__dirname, "../tarkov-data-overlay-niv/src/overrides/items.json5"),
+      path.resolve(__dirname, "https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/src/overrides/items.json5"),
     parser: parseGeneric,
   },
   traders: {
     title: "Traders",
     path:
       process.env.TARGET_TRADERS ||
-      path.resolve(__dirname, "../tarkov-data-overlay-niv/src/overrides/traders.json5"),
+      path.resolve(__dirname, "https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/src/overrides/traders.json5"),
     parser: parseGeneric,
   },
 };
