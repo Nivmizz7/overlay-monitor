@@ -11,19 +11,19 @@ let pollTimer = null;
 const typeMap = {
   tasks: {
     title: "Tasks",
-    lede: "Corrections sur les taches.",
+    lede: "Task corrections.",
   },
   hideout: {
     title: "Hideout",
-    lede: "Corrections sur le hideout.",
+    lede: "Hideout corrections.",
   },
   items: {
     title: "Items",
-    lede: "Corrections sur les items.",
+    lede: "Item corrections.",
   },
   traders: {
     title: "Traders",
-    lede: "Corrections sur les traders.",
+    lede: "Trader corrections.",
   },
 };
 
@@ -70,7 +70,7 @@ function renderSections(sections) {
     if (section.truncated) {
       const note = document.createElement("div");
       note.className = "note";
-      note.textContent = "Affichage limite. Augmente MAX_ROWS si besoin.";
+      note.textContent = "Display is truncated. Increase MAX_ROWS if needed.";
       wrapper.appendChild(note);
     }
 
@@ -109,14 +109,14 @@ function updateStatus(state) {
     return;
   }
   if (state.error) {
-    statusEl.textContent = "Erreur de lecture";
+    statusEl.textContent = "Read error";
   } else {
-    statusEl.textContent = "Synchronise";
+    statusEl.textContent = "Synced";
   }
 
   if (state.updatedAt) {
     const updatedDate = new Date(state.updatedAt);
-    updatedEl.textContent = `Derniere mise a jour : ${updatedDate.toLocaleString()}`;
+    updatedEl.textContent = `Last update: ${updatedDate.toLocaleString()}`;
   }
 
   if (state.filePath) {
@@ -135,7 +135,7 @@ async function fetchLatest() {
     const data = await response.json();
     updateStatus(data);
   } catch (error) {
-    statusEl.textContent = "Erreur de chargement";
+    statusEl.textContent = "Load error";
   }
 }
 
@@ -159,7 +159,7 @@ function connectEvents() {
     updateStatus(JSON.parse(event.data));
   });
   source.onerror = () => {
-    statusEl.textContent = "Connexion interrompue";
+    statusEl.textContent = "Connection lost";
     source.close();
     startPolling();
     fetchLatest();
