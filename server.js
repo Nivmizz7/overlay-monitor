@@ -15,40 +15,28 @@ const SOURCES = {
     title: "Tasks",
     path:
       process.env.TARGET_TASKS ||
-      path.resolve(
-        __dirname,
-        "https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/src/overrides/tasks.json5",
-      ),
+      "https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/src/overrides/tasks.json5",
     parser: parseTasks,
   },
   hideout: {
     title: "Hideout",
     path:
       process.env.TARGET_HIDEOUT ||
-      path.resolve(
-        __dirname,
-        "https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/src/overrides/hideout.json5",
-      ),
+      "https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/src/overrides/hideout.json5",
     parser: parseGeneric,
   },
   items: {
     title: "Items",
     path:
       process.env.TARGET_ITEMS ||
-      path.resolve(
-        __dirname,
-        "https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/src/overrides/items.json5",
-      ),
+      "https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/src/overrides/items.json5",
     parser: parseGeneric,
   },
   traders: {
     title: "Traders",
     path:
       process.env.TARGET_TRADERS ||
-      path.resolve(
-        __dirname,
-        "https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/src/overrides/traders.json5",
-      ),
+      "https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/src/overrides/traders.json5",
     parser: parseGeneric,
   },
 };
