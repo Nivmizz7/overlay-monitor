@@ -42,6 +42,34 @@ body {
   margin-bottom: 32px;
 }
 
+.nav {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.nav a {
+  text-decoration: none;
+  color: var(--muted);
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: rgba(255, 255, 255, 0.04);
+  transition: all 0.2s ease;
+}
+
+.nav a:hover {
+  color: var(--ink);
+  border-color: var(--border);
+}
+
+.nav a.active {
+  color: var(--ink);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px rgba(70, 178, 157, 0.3);
+}
+
 .eyebrow {
   text-transform: uppercase;
   letter-spacing: 0.2em;
@@ -168,10 +196,28 @@ h1 {
   margin-bottom: 16px;
 }
 
-.note {
+.sections {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.section {
+  padding: 18px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--border);
+}
+
+.section h2 {
+  margin: 0 0 10px;
+  font-size: 1.2rem;
+}
+
+.section .note {
   color: var(--muted);
   font-size: 0.85rem;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 @keyframes fadeUp {

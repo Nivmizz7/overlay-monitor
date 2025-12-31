@@ -11,10 +11,9 @@
       <header class="hero">
         <div>
           <p class="eyebrow">Overlay Monitor</p>
-          <h1>Changements en direct</h1>
-          <p class="lede">
-            Vue dynamique des changements detects sur
-            <span class="code">overlay.json</span>.
+          <h1 id="page-title">Corrections</h1>
+          <p class="lede" id="page-lede">
+            Vue dynamique des corrections par fichier.
           </p>
         </div>
         <div class="meta">
@@ -23,21 +22,16 @@
           <div class="path" id="path"></div>
         </div>
       </header>
+      <nav class="nav" id="nav">
+        <a href="/tasks" data-type="tasks">Tasks</a>
+        <a href="/hideout" data-type="hideout">Hideout</a>
+        <a href="/items" data-type="items">Items</a>
+        <a href="/traders" data-type="traders">Traders</a>
+      </nav>
       <main>
         <section class="content">
           <div class="empty" id="empty">Aucun changement detecte.</div>
-          <div class="note" id="note"></div>
-          <table class="table" id="table">
-            <thead>
-              <tr>
-                <th>Type</th>
-                <th>Chemin</th>
-                <th>Ancienne valeur</th>
-                <th>Nouvelle valeur</th>
-              </tr>
-            </thead>
-            <tbody id="tbody"></tbody>
-          </table>
+          <div class="sections" id="sections"></div>
         </section>
       </main>
     </div>
